@@ -1,6 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from pydantic import BaseModel
-from services import break_task_service
+from services import openai_client
 
 router = APIRouter()
 
@@ -12,8 +12,9 @@ async def break_task(data: TaskInput):
     """
     Breaks down a task into smaller, manageable tasks.
     """
+    print("Received task:", data.task)
     try:
-        subtasks = await break_task_service.break_task(data.task)
+        subtasks = await openai_client.generate_subtasks(data.task)
         return {"subtasks": subtasks}
     except Exception as e:
         return {"error": str(e)}
