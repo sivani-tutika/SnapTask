@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import axios from 'axios'
 import './App.css'
 
 type Task = {
@@ -16,13 +15,35 @@ function App() {
 
   const addTask = () => {
     if (newTask.trim()) {
-
-      setTasks([...tasks, { id: Date.now(), text: newTask, completed: false}])
+      setTasks([...tasks, { id: Date.now(), text: newTask, completed: false }])
       setNewTask("")
       setShowDialog(false)
     }
   }
 
+  const handleBreakTask = async () => {
+    if (!newTask.trim()) return;
+
+    try {
+      const res = await axios.post("http://localhost:8000/break_task", {
+        task: newTask
+      });
+      const subtasks = res.data.subtasks;
+
+      const newSubtasks = subtasks.map((text: string) => ({
+        id: Date.now() + Math.random(), // ensure unique id
+        text,
+        completed: false
+      }));
+
+      setTasks([...tasks, ...newSubtasks]);
+      setNewTask("");
+      setShowDialog(false);
+    } catch (err) {
+      console.error("Error breaking task:", err);
+      alert("Something went wrong.");
+    }
+  }
 
   const toggleComplete = (id: number) => {
     setTasks(tasks.map(task =>
@@ -34,12 +55,17 @@ function App() {
     setTasks(tasks.filter(task => task.id !== id))
   }
 
-
- return (
-    <div id="root">
+  return (
+    <div id="root" className="fullscreen flex flex-col items-center justify-center p-4">
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <button onClick={() => setShowDialog(true)}>+ Create Task</button>
+      <div className="fixed top-0 left-0 w-full bg-white shadow-md px-8 py-4 z-50 flex items-center justify-between">
+        <h1 className="text-4xl font-bold">SnapTask</h1>
+        <button
+          onClick={() => setShowDialog(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 right-0"
+        >
+          + Create Task
+        </button>
       </div>
 
       {/* Task List */}
@@ -50,7 +76,6 @@ function App() {
             className="card"
             style={{
               marginBottom: "1rem",
-              // background: "#f0f0f0",
               borderRadius: "8px",
               display: "flex",
               justifyContent: "space-between",
@@ -81,7 +106,6 @@ function App() {
         <div
           style={{
             marginTop: "2rem",
-            // background: "#fff",
             padding: "1.5rem",
             border: "1px solid #ccc",
             borderRadius: "8px",
@@ -96,6 +120,7 @@ function App() {
           />
           <br />
           <button onClick={addTask} style={{ marginRight: "0.5rem" }}>Add</button>
+          <button onClick={handleBreakTask} style={{ marginRight: "0.5rem" }}>Break Task</button>
           <button onClick={() => setShowDialog(false)}>Cancel</button>
         </div>
       )}
