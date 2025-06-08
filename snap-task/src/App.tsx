@@ -56,7 +56,7 @@ function App() {
   }
 
   return (
-    <div id="root" className="fullscreen flex flex-col items-center justify-center p-4">
+    <div id="root">
       {/* Header */}
       <div className="fixed top-0 left-0 w-full bg-white shadow-md px-8 py-4 z-50 flex items-center justify-between">
         <h1 className="text-4xl font-bold">SnapTask</h1>
